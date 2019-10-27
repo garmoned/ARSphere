@@ -11,13 +11,14 @@ using BestHTTP.SignalRCore.Encoders;
 using UnityEngine.Android;
 using UnityEngine.Networking;
 
+
 namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 {
     public abstract class ARbase : InputInteractionBase
     {
         #region Member Variables
 
-        private HubConnection connection;
+        protected HubConnection connection;
         private Task advanceDemoTask = null;
         protected bool isErrorActive = false;
         protected Text feedbackBox;
@@ -66,9 +67,10 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             // Pass to base for final cleanup
             base.OnDestroy();
         }
+    
 
 
-        public  void connectToSignalR()
+        private void connectToSignalR()
         {
 
             HubOptions options = new HubOptions();
@@ -77,14 +79,31 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             Uri uri = new Uri("https://ar-sphere-server.azurewebsites.net/connect");
 
-            connection = new HubConnection(uri, new JsonProtocol(new LitJsonEncoder()),options);
+            connection = new HubConnection(uri, new JsonProtocol(new LitJsonEncoder()), options);
 
             connection.OnConnected += (connection) =>
             {
                 Debug.Log("connected!!!");
             };
 
+
+
+            connection.OnError += (connection, err) =>
+            {
+                Debug.Log(err);
+            };
+
+
+
             connection.StartConnect();
+
+        }
+        public  void testSignalR()
+        {
+
+ 
+
+            connection.Invoke<string>("Ping", "Hello world").OnSuccess(ret => Debug.Log(ret));
 
 
 
@@ -107,7 +126,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         public override void Start()
         {
 
-            
+
+
+            connectToSignalR();
 
             if (XRUXPicker.Instance.getAnchorId()!=null) anchorId = XRUXPicker.Instance.getAnchorId();
 
@@ -158,12 +179,12 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
            protected void runGps()
             {
 
-            if (Input.location.isEnabledByUser && Input.location.status == LocationServiceStatus.Running) {
-                String latitude = "Lat: " + Input.location.lastData.latitude.ToString();
-                String longitude = "Long: " + Input.location.lastData.longitude.ToString();
-                LongitudeBox.text = longitude;
-                LatitudeBox.text = latitude;
-            }
+                if (Input.location.isEnabledByUser && Input.location.status == LocationServiceStatus.Running) {
+                    String latitude = "Lat: " + Input.location.lastData.latitude.ToString();
+                    String longitude = "Long: " + Input.location.lastData.longitude.ToString();
+                    LongitudeBox.text = longitude;
+                    LatitudeBox.text = latitude;
+                }
  
             }
            public void initGps()

@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
+using System.Linq;
+using System.Reflection;
 
 
 namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
@@ -104,6 +105,13 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             Debug.Log("Azure Spatial Anchors Demo script started");
         }
 
+
+
+
+       
+
+
+
         protected override void OnCloudAnchorLocated(AnchorLocatedEventArgs args)
         {
             base.OnCloudAnchorLocated(args);
@@ -149,6 +157,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 spawnedObjectMat.color = GetStepColor() * rat;
             }
 
+
             
         }
 
@@ -162,14 +171,38 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             return stateParams[currentAppState].StepColor;
         }
 
-
+   
+      
         protected void saveAnchorId(string id)
         {
-            WWWForm form = new WWWForm();
-            form.AddField("anchor", id);
-            UnityWebRequest www = UnityWebRequest.Post("https://anchorserver.herokuapp.com/saveAnchor",form);
-            www.SendWebRequest();
+            double x = 0;
+            double y = 0;
+
+            double.TryParse(LongitudeBox.text, out x);
+            double.TryParse(LatitudeBox.text, out y);
+
+
+
+
+            connection.Invoke<Task>("CreateAnchor", new
+            {
+                ID = id,
+                X = x,
+                Y = y,
+                Model = 0,
+                Creator = 0
+
+            }).OnSuccess((ret) =>
+            {
+                Debug.Log("saved the cloud anchor");
+
+            }).OnError((err) => {
+
+                Debug.LogError(err);
+
+            });
         }
+
         protected override async Task OnSaveCloudAnchorSuccessfulAsync()
         {
             await base.OnSaveCloudAnchorSuccessfulAsync();
@@ -178,6 +211,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             currentAnchorId = currentCloudAnchor.Identifier;
 
+            saveAnchorId(currentCloudAnchor.Identifier);
             // Sanity check that the object is still where we expect
             Pose anchorPose = Pose.identity;
 
@@ -268,19 +302,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         }
 
 
-        public string getId()
-        {
-            UnityWebRequest www = UnityWebRequest.Get("https://anchorserver.herokuapp.com/getAnchor");
-
-            www.SendWebRequest();
-
-            while (!www.isDone && !www.isNetworkError) ;
-
-            string id = www.downloadHandler.text;
-
-            return id;
-
-        }
+     
 
         public void findAnchors()
         {
@@ -303,19 +325,38 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         {
             List<string> anchorsToFind = new List<string>();
 
-            if (_currentMode == AppMode.finding)
+           if (_currentMode == AppMode.finding)
             {
-                string idToFind = getId();
-
-                Debug.Log(idToFind);
-
-                anchorId.text = idToFind;
 
 
-                anchorsToFind.Add(idToFind);
+
+                connection.Invoke<dynamic>("GetLastAnchor")
+                .OnSuccess((ret) =>
+                {
+
+                    string idToFind = ret["id"];
+
+                    Debug.Log(idToFind);
+
+                    anchorId.text = idToFind;
+
+
+                    anchorsToFind.Add(idToFind);
+
+                    SetAnchorIdsToLocate(anchorsToFind);
+                    
+
+                });
+
+
+
+            }
+            else
+            {
+                SetAnchorIdsToLocate(anchorsToFind);
             }
 
-            SetAnchorIdsToLocate(anchorsToFind);
+            
         }
     }
 }

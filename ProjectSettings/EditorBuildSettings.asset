@@ -5,25 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 0
-    path: Assets/AzureSpatialAnchors.Examples/Scenes/SavingAnchors.unity
-    guid: 8eb951603c1152c4e920887a18cc2733
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 1
-    path: Assets/ARSphere/Scenes/ARSphere.unity
-    guid: df22493240a8af240b4d74d9bb8b50bd
-  - enabled: 0
-    path: Assets/AzureSpatialAnchors.Examples/Scenes/FunctionSelector.unity
-    guid: a2d21af2a68b5dd47a154addc7e3b92a
   - enabled: 1
     path: Assets/ARSphere/Scenes/Login.unity
     guid: c5279bcd1b7b4424795b0f3a75636158
+  - enabled: 1
+    path: Assets/ARSphere/Scenes/ARSphere.unity
+    guid: df22493240a8af240b4d74d9bb8b50bd
   m_configObjects: {}
