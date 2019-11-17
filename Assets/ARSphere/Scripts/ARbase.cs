@@ -1,5 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT license.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,13 +9,17 @@ using BestHTTP.SignalRCore.Encoders;
 using UnityEngine.Android;
 using UnityEngine.Networking;
 
-
 namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 {
     public abstract class ARbase : InputInteractionBase
     {
         #region Member Variables
 
+        protected string foundId = "";
+        private float oldLongitude;
+        private float oldLatitude;
+        protected string selectedModel;
+        protected bool needsNewData = true;
         protected HubConnection connection;
         private Task advanceDemoTask = null;
         protected bool isErrorActive = false;
@@ -38,6 +40,8 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         [SerializeField]
         [Tooltip("The prefab used to represent an anchored object.")]
         private GameObject anchoredObjectPrefab = null;
+
+        protected Dictionary<string, string> idToModelMap;
 
         [SerializeField]
         [Tooltip("SpatialAnchorManager instance to use for this demo. This is required.")]
@@ -62,16 +66,22 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 currentWatcher = null;
             }
 
+
+
             CleanupSpawnedObjects();
 
             // Pass to base for final cleanup
             base.OnDestroy();
         }
-    
 
-
-        private void connectToSignalR()
+        
+        public void connectToSignalR()
         {
+
+            
+            Debug.Log("trying to connect to signalR");
+
+
 
             HubOptions options = new HubOptions();
 
@@ -86,26 +96,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 Debug.Log("connected!!!");
             };
 
-
-
-            connection.OnError += (connection, err) =>
-            {
-                Debug.Log(err);
-            };
-
-
-
             connection.StartConnect();
-
-        }
-        public  void testSignalR()
-        {
-
- 
-
-            connection.Invoke<string>("Ping", "Hello world").OnSuccess(ret => Debug.Log(ret));
-
-
 
         }
 
@@ -127,10 +118,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         {
 
 
-
             connectToSignalR();
 
-            if (XRUXPicker.Instance.getAnchorId()!=null) anchorId = XRUXPicker.Instance.getAnchorId();
+            if (XRUXPicker.Instance.getAnchorId() != null) anchorId = XRUXPicker.Instance.getAnchorId();
 
             feedbackBox = XRUXPicker.Instance.GetFeedbackText();
             LatitudeBox = XRUXPicker.Instance.getLatitudeBox();
@@ -158,7 +148,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
 
 
-            if (AnchoredObjectPrefab == null)
+            if (DefaultPrefab == null)
             {
                 feedbackBox.text = "CreationTarget must be set on the demo script.";
                 return;
@@ -174,26 +164,40 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             base.Start();
         }
-            
 
-           protected void runGps()
+
+        protected void runGps()
+        {
+
+            if (Input.location.isEnabledByUser && Input.location.status == LocationServiceStatus.Running)
             {
-
-                if (Input.location.isEnabledByUser && Input.location.status == LocationServiceStatus.Running) {
-                    String latitude = "Lat: " + Input.location.lastData.latitude.ToString();
-                    String longitude = "Long: " + Input.location.lastData.longitude.ToString();
-                    LongitudeBox.text = longitude;
-                    LatitudeBox.text = latitude;
-                }
- 
+                String latitude = "Lat: " + Input.location.lastData.latitude.ToString();
+                String longitude = "Long: " + Input.location.lastData.longitude.ToString();
+                LongitudeBox.text = longitude;
+                LatitudeBox.text = latitude;
             }
-           public void initGps()
-           {
 
-            if (Input.location.isEnabledByUser) 
+            if (distBetweenCoordinates(oldLatitude, oldLongitude, Input.location.lastData.latitude, Input.location.lastData.longitude) > 50)
+            {
+                oldLatitude = Input.location.lastData.latitude;
+                oldLongitude = Input.location.lastData.longitude;
+
+                needsNewData = true;
+
+            }
+
+
+
+        }
+        public void initGps()
+        {
+
+            if (Input.location.isEnabledByUser)
                 Input.location.Start();
-                 
-            
+
+            oldLatitude = Input.location.lastData.latitude;
+            oldLongitude = Input.location.lastData.longitude;
+
         }
 
         /// <summary>
@@ -201,25 +205,13 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// </summary>
         /// <returns>
         /// A <see cref="Task"/> that represents the operation.
-        /// </returns>
-        public abstract Task AdvanceDemoAsync();
+        /// </returns
 
         /// <summary>
         /// This version only exists for Unity to wire up a button click to.
         /// If calling from code, please use the Async version above.
         /// </summary>
-        public async void AdvanceDemo()
-        {
-            try
-            {
-                await AdvanceDemoAsync();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"{nameof(ARbase)} - Error in {nameof(AdvanceDemo)}: {ex.Message} {ex.StackTrace}");
-                feedbackBox.text = $"Demo failed, check debugger output for more information";
-            }
-        }
+
 
         /// <summary>
         /// returns to the launcher scene.
@@ -319,7 +311,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// Gets the color of the current demo step.
         /// </summary>
         /// <returns><see cref="Color"/>.</returns>
-        protected abstract Color GetStepColor();
+    
 
         /// <summary>
         /// Determines whether the demo is in a mode that should place an object.
@@ -390,13 +382,13 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// </summary>
         protected override void OnGazeInteraction()
         {
-            #if WINDOWS_UWP || UNITY_WSA
+#if WINDOWS_UWP || UNITY_WSA
             // HoloLens gaze interaction
             if (IsPlacingObject())
             {
                 base.OnGazeInteraction();
             }
-            #endif
+#endif
         }
 
         /// <summary>
@@ -408,10 +400,10 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         {
             base.OnGazeObjectInteraction(hitPoint, hitNormal);
 
-            #if WINDOWS_UWP || UNITY_WSA
+#if WINDOWS_UWP || UNITY_WSA
             Quaternion rotation = Quaternion.FromToRotation(Vector3.up, hitNormal);
             SpawnOrMoveCurrentAnchoredObject(hitPoint, rotation);
-            #endif
+#endif
         }
 
         /// <summary>
@@ -443,10 +435,10 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// <remarks>Currently only called for HoloLens.</remarks>
         protected override void OnSelectInteraction()
         {
-            #if WINDOWS_UWP || UNITY_WSA
+#if WINDOWS_UWP || UNITY_WSA
             // On HoloLens, we just advance the demo.
             UnityDispatcher.InvokeOnAppThread(() => advanceDemoTask = AdvanceDemoAsync());
-            #endif
+#endif
 
             base.OnSelectInteraction();
         }
@@ -482,7 +474,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// Saves the current object anchor to the cloud.
         /// </summary>
         /// 
-   
+
         protected virtual async Task SaveCurrentObjectAnchorToCloudAsync()
         {
             // Get the cloud-native anchor behavior
@@ -523,7 +515,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 {
                     // Await override, which may perform additional tasks
                     // such as storing the key in the AnchorExchanger
-         
+                 
                     await OnSaveCloudAnchorSuccessfulAsync();
                 }
                 else
@@ -543,17 +535,38 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// <param name="worldPos">The world position.</param>
         /// <param name="worldRot">The world rotation.</param>
         /// <returns><see cref="GameObject"/>.</returns>
-        protected virtual GameObject SpawnNewAnchoredObject(Vector3 worldPos, Quaternion worldRot)
+        protected virtual GameObject SpawnNewAnchoredObject(Vector3 worldPos, Quaternion worldRot, CloudSpatialAnchor anchor,string not)
         {
             // Create the prefab
-            GameObject newGameObject = GameObject.Instantiate(AnchoredObjectPrefab, worldPos, worldRot);
+            GameObject newGameObject;
+
+            string selector = foundId == "" ? selectedModel : idToModelMap[foundId];
+
+            Debug.Log(selector + " <-- selector");
+
+            switch (selector)
+            {
+                case "Hot Dog":
+                     newGameObject = GameObject.Instantiate(HotDogPreFab, worldPos, worldRot);
+                    break;
+                case "Space Ship":
+                     newGameObject = GameObject.Instantiate(SpaceShipPrefab, worldPos, worldRot);
+                    break;
+                default:
+                     newGameObject = GameObject.Instantiate(DefaultPrefab, worldPos, worldRot);
+                    break;
+
+            }
+
 
             // Attach a cloud-native anchor behavior to help keep cloud
             // and native anchors in sync.
+
+            foundId = "";
             newGameObject.AddComponent<CloudNativeAnchor>();
 
             // Set the color
-            newGameObject.GetComponent<MeshRenderer>().material.color = GetStepColor();
+
 
             // Return created object
             return newGameObject;
@@ -565,11 +578,11 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         /// <param name="worldPos">The world position.</param>
         /// <param name="worldRot">The world rotation.</param>
         /// <param name="cloudSpatialAnchor">The cloud spatial anchor.</param>
-        /// <returns><see cref="GameObject"/>.</returns>
+        /// <returns><see cref="GameObject"/>.</returns>    
         protected virtual GameObject SpawnNewAnchoredObject(Vector3 worldPos, Quaternion worldRot, CloudSpatialAnchor cloudSpatialAnchor)
         {
             // Create the object like usual
-            GameObject newGameObject = SpawnNewAnchoredObject(worldPos, worldRot);
+            GameObject newGameObject = SpawnNewAnchoredObject(worldPos, worldRot,cloudSpatialAnchor,"");
 
             // If a cloud anchor is passed, apply it to the native anchor
             if (cloudSpatialAnchor != null)
@@ -579,7 +592,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
 
             // Set color
-            newGameObject.GetComponent<MeshRenderer>().material.color = GetStepColor();
 
             // Return newly created object
             return newGameObject;
@@ -597,11 +609,11 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             // Anchor behavior to the spawned object
             if (spawnedObject == null)
             {
+               
                 // Use factory method to create
                 spawnedObject = SpawnNewAnchoredObject(worldPos, worldRot, currentCloudAnchor);
 
                 // Update color
-                spawnedObjectMat = spawnedObject.GetComponent<MeshRenderer>().material;
             }
             else
             {
@@ -649,11 +661,42 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         }
 
 
+        float degreesToRadians(float degrees)
+        {
+            return degrees *(float) Math.PI / 180;
+        }
+
+        float distBetweenCoordinates(float lat1, float lon1, float lat2, float lon2)
+        {
+            var earthRadiusKm = 6371000;
+
+            var dLat = degreesToRadians(lat2 - lat1);
+            var dLon = degreesToRadians(lon2 - lon1);
+
+            lat1 = degreesToRadians(lat1);
+            lat2 = degreesToRadians(lat2);
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2) * Math.Cos(lat1) * Math.Cos(lat2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return earthRadiusKm * (float) c;
+        }
+
+
         #region Public Properties
         /// <summary>
         /// Gets the prefab used to represent an anchored object.
         /// </summary>
-        public GameObject AnchoredObjectPrefab { get { return anchoredObjectPrefab; } }
+
+        [SerializeField]
+        public GameObject DefaultPrefab;
+        public GameObject HotDogPreFab;
+        public GameObject SpaceShipPrefab;
+
+        public GameObject _DefaultPrefab { get { return DefaultPrefab; } }
+        public GameObject _HotDogPreFab { get { return HotDogPreFab; } }
+        public GameObject _SpaceShipPrefab { get { return SpaceShipPrefab; } }
 
         /// <summary>
         /// Gets the <see cref="SpatialAnchorManager"/> instance used by this demo.

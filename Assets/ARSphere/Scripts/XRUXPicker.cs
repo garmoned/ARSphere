@@ -28,7 +28,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
-        public GameObject HoloLensUXTree;
         public GameObject MobileAndEditorUXTree;
 
         void Awake()
@@ -111,7 +110,14 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             return t;
         }
 
+        public string getSelectedModel()
+        {
+            Dropdown dropdown = GameObject.FindGameObjectWithTag("ModelSelector").GetComponent<Dropdown>();
 
+            Debug.Log(dropdown.options[dropdown.value].text);
+
+            return dropdown.options[dropdown.value].text;
+        }
         public Button GetDemoButton()
         {
 
