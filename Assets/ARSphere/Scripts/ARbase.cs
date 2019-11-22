@@ -468,6 +468,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             {
                 base.OnTouchInteraction(touch);
             }
+
+
+           
         }
 
         /// <summary>

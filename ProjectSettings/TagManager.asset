@@ -11,6 +11,7 @@ TagManager:
   - GPSCoords
   - LatitudeBox
   - LongitudeBox
+  - ModelSelector
   layers:
   - Default
   - TransparentFX
