@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: d0cfba020c4d56a44879d0c0ea411af6
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Geomanist
+  fontNames:
+  - Geomanist
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: bf13e584ae70a8942bea1329c8fc6423, type: 3}
+  - {fileID: 12800000, guid: 356cb996bee0f0e4d93ef58f5f8f3b30, type: 3}
+  - {fileID: 12800000, guid: 5f4ddf972f545dc4b81e860d84b615cb, type: 3}
+  - {fileID: 12800000, guid: 71e6d658c174aae4a8b1b65e0882fd9b, type: 3}
+  - {fileID: 12800000, guid: c0e3a669cd370094f850d5ac03c7c6f1, type: 3}
+  - {fileID: 12800000, guid: 42ace6993a3982341accd6513747ec64, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
