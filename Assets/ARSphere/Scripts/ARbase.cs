@@ -519,7 +519,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 // Success?
                 success = currentCloudAnchor != null;
 
-                if (success)
+                if (success && !isErrorActive)
                 {
                     // Await override, which may perform additional tasks
                     // such as storing the key in the AnchorExchanger

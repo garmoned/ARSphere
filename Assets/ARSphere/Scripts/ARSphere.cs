@@ -277,13 +277,13 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             switch (selectedModel)
             {
                 case "Hot Dog":
-                    modelNumber = 3;
+                    modelNumber = 1;
                     break;
                 case "Space Ship":
-                    modelNumber = 4;
+                    modelNumber = 2;
                     break;
                 default:
-                    modelNumber = 5;
+                    modelNumber = 3;
                     break;
             }
 
