@@ -87,9 +87,14 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             options.SkipNegotiation = false;
 
-            Uri uri = new Uri("https://ar-sphere-server.azurewebsites.net/connect");
+            Uri uri = new Uri("https://ar-sphere-server-2.azurewebsites.net/connect");
 
             connection = new HubConnection(uri, new JsonProtocol(new LitJsonEncoder()), options);
+
+            connection.OnError += (connection, error) =>
+            {
+                Debug.Log(error);
+            };
 
             connection.OnConnected += (connection) =>
             {
@@ -514,7 +519,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 // Success?
                 success = currentCloudAnchor != null;
 
-                if (success && !isErrorActive)
+                if (success)
                 {
                     // Await override, which may perform additional tasks
                     // such as storing the key in the AnchorExchanger
