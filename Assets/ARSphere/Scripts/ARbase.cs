@@ -34,15 +34,16 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         protected CloudSpatialAnchorWatcher currentWatcher;
         protected GameObject spawnedObject = null;
         protected Material spawnedObjectMat = null;
-        #endregion // Member Variables
 
-        #region Unity Inspector Variables
-        [SerializeField]
-        [Tooltip("The prefab used to represent an anchored object.")]
-        private GameObject anchoredObjectPrefab = null;
+        protected List<string> anchorsToFind = new List<string>();
 
         protected Dictionary<string, string> idToModelMap;
 
+        protected List<dynamic> newNearbyAnchors = new List<dynamic>();
+
+        #endregion // Member Variables
+
+        #region Unity Inspector Variables
         [SerializeField]
         [Tooltip("SpatialAnchorManager instance to use for this demo. This is required.")]
         private SpatialAnchorManager cloudManager = null;
@@ -73,15 +74,11 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             // Pass to base for final cleanup
             base.OnDestroy();
         }
-
         
         public void connectToSignalR()
         {
 
-            
             Debug.Log("trying to connect to signalR");
-
-
 
             HubOptions options = new HubOptions();
 
@@ -99,12 +96,39 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             connection.OnConnected += (connection) =>
             {
                 Debug.Log("connected!!!");
+
+
             };
+
+          
+            connection.On("NewNearbyAnchor", async( dynamic anchor) => {
+
+                Debug.Log("new nearby anchor!!!");
+
+                newNearbyAnchors.Add(anchor);
+
+                if (!anchorsToFind.Contains(anchor["id"]))
+                {
+                    idToModelMap.Add(anchor["id"], anchor["model"] == null ? "Default" : anchor["model"]["name"]);
+                    anchorsToFind.Add(anchor["id"]);
+                    CloudManager.StopSession();
+                    SetAnchorIdsToLocate(anchorsToFind);
+
+                    await CloudManager.StartSessionAsync()
+                    .ContinueWith(state => {
+
+                        SetGraphEnabled(true);
+                        currentWatcher = CreateWatcher();
+                    });
+
+
+                }
+
+            });
 
             connection.StartConnect();
 
         }
-
         public virtual bool SanityCheckAccessConfiguration()
         {
             if (string.IsNullOrWhiteSpace(CloudManager.SpatialAnchorsAccountId) || string.IsNullOrWhiteSpace(CloudManager.SpatialAnchorsAccountKey))
@@ -427,7 +451,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
         /// <summary>
         /// Called when a cloud anchor is saved successfully.
-        /// </summary>
+        /// </summary>N
         protected virtual Task OnSaveCloudAnchorSuccessfulAsync()
         {
             // To be overridden.
@@ -519,7 +543,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                 // Success?
                 success = currentCloudAnchor != null;
 
-                if (success && !isErrorActive)
+                if (success)
                 {
                     // Await override, which may perform additional tasks
                     // such as storing the key in the AnchorExchanger

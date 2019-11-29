@@ -145,19 +145,15 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                    await CloudManager.CreateSessionAsync();
                    await CloudManager.StartSessionAsync();
               }  
-                
-              
+               
                 _currentMode = AppMode.none;
 
             }
 
-
            if (needsNewData && _currentMode == AppMode.none && connection.State == BestHTTP.SignalRCore.ConnectionStates.Connected)
             {
 
-
                 Debug.Log("getting New data");
-
 
                 _currentMode = AppMode.gettingNewData;
                 needsNewData = false;
@@ -168,10 +164,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
                     Debug.Log("got data back!!");
 
-                    List<string> anchorsToFind = new List<string>();
+                    anchorsToFind = new List<string>();
                     idToModelMap = new Dictionary<string, string>();
 
-                    
                     foreach (dynamic var in ret)
                     {
 
@@ -186,7 +181,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                         anchorsToFind.Add(var["id"]);
 
                     }
-
 
                     SetAnchorIdsToLocate(anchorsToFind);
 
@@ -232,11 +226,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
 
                 });
-
-
-                
-
-
 
             }
              
