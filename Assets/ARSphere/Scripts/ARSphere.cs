@@ -29,7 +29,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         private readonly List<GameObject> allSpawnedObjects = new List<GameObject>();
         private readonly List<Material> allSpawnedMaterials = new List<Material>();
 
-
+       
         private string currentAnchorId = "";
 
         /// <summary>
@@ -118,14 +118,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         {
             base.Update();
 
-            runGps();
+          Debug.Log(currentCloudAnchor);
 
-
-            Debug.Log(currentCloudAnchor);
-
-            selectedModel = XRUXPicker.Instance.getSelectedModel();
-
-
+            selectedModel = XRUXPicker.Instance.getSelectedModel();           
             if(_currentMode  != AppMode.saving )feedbackBox.text = _currentMode.ToString();
 
             Debug.Log(needsNewData);
@@ -138,7 +133,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
                 currentAnchorId = "";
                 currentCloudAnchor = null;
-
+                 
 
                 if (CloudManager.Session == null) {
 
@@ -270,6 +265,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                     break;
                 case "Space Ship":
                     modelNumber = 2;
+                    break;
+                case "Tree":
+                    modelNumber = 4;
                     break;
                 default:
                     modelNumber = 3;

@@ -599,14 +599,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1fcde03947ef64418a3aa83559f9710, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  anchoredObjectPrefab: {fileID: 1381081679223924209, guid: 5960ac3579504cb4cb642ee304948aab,
-    type: 3}
   cloudManager: {fileID: 294771744}
   DefaultPrefab: {fileID: 1147623660883556, guid: b11f07d068155ed46a0a5a3db56a6e3b,
     type: 3}
   HotDogPreFab: {fileID: 1147623660883556, guid: e593bfccf03b6444da88c7591f906ba8,
     type: 3}
   SpaceShipPrefab: {fileID: 1381081679223924209, guid: 5960ac3579504cb4cb642ee304948aab,
+    type: 3}
+  TreePrefab: {fileID: 2392393963695132292, guid: 7601b022f6dd4034b8704c17057b249e,
     type: 3}
 --- !u!4 &294771743
 Transform:
@@ -2119,6 +2119,8 @@ MonoBehaviour:
     - m_Text: Hot Dog
       m_Image: {fileID: 0}
     - m_Text: Space Ship
+      m_Image: {fileID: 0}
+    - m_Text: Tree
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:

@@ -42,7 +42,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         protected List<dynamic> newNearbyAnchors = new List<dynamic>();
 
         #endregion // Member Variables
-
+         
         #region Unity Inspector Variables
         [SerializeField]
         [Tooltip("SpatialAnchorManager instance to use for this demo. This is required.")]
@@ -578,6 +578,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             switch (selector)
             {
+                case "Tree":
+                    newGameObject = GameObject.Instantiate(TreePrefab, worldPos, worldRot);
+                    break;
                 case "Hot Dog":
                      newGameObject = GameObject.Instantiate(HotDogPreFab, worldPos, worldRot);
                     break;
@@ -725,10 +728,12 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         public GameObject DefaultPrefab;
         public GameObject HotDogPreFab;
         public GameObject SpaceShipPrefab;
+        public GameObject TreePrefab;
 
         public GameObject _DefaultPrefab { get { return DefaultPrefab; } }
         public GameObject _HotDogPreFab { get { return HotDogPreFab; } }
         public GameObject _SpaceShipPrefab { get { return SpaceShipPrefab; } }
+        public GameObject _TreePrefab { get { return TreePrefab; } }
 
         /// <summary>
         /// Gets the <see cref="SpatialAnchorManager"/> instance used by this demo.

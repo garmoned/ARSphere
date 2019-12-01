@@ -12,11 +12,11 @@ GameObject:
   - component: {fileID: 33262360891599078}
   - component: {fileID: 23909712852490322}
   m_Layer: 0
-  m_Name: AzureSpatialAnchorsDemoObject
+  m_Name: HotDogPreFab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 1
   m_IsActive: 1
 --- !u!4 &4450555127863672
 Transform:
